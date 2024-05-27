@@ -13,4 +13,4 @@ RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
 COPY . .
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
