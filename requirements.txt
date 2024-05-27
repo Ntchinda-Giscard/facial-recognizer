@@ -1,4 +1,3 @@
 facedb
 fastapi
 uvicorn
-uvicorn
