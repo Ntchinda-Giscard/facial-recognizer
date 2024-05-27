@@ -43,9 +43,15 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
 
-RUN mkdir facedata && chmod -R 777 facedata
+# Create the directories and set permissions
+RUN mkdir /code/facedata /code/UPLOAD /code/FIND && chmod -R 777 /code/facedata /code/UPLOAD /code/FIND
+
+# Create a non-root user and group
 RUN groupadd -r appgroup && useradd -r -g appgroup -d /code -s /sbin/nologin appuser
-RUN chown -R appuser:appgroup /code facedata
+
+# Change ownership of the /code directory and the newly created directories
+RUN chown -R appuser:appgroup /code /code/facedata /code/UPLOAD /code/FIND
+
 
 COPY . .
 
