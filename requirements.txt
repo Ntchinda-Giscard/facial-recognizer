@@ -1,5 +1,4 @@
 facedb
 fastapi
 uvicorn
-# opencv-python==4.6.0.66
 uvicorn
