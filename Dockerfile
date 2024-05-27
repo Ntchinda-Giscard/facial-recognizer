@@ -43,6 +43,10 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
 
+RUN mkdir facedata && chmod -R 777 facedata
+RUN groupadd -r appgroup && useradd -r -g appgroup -d /code -s /sbin/nologin appuser
+RUN chown -R appuser:appgroup /code facedata
+
 COPY . .
 
 CMD ["python", "app.py"]
