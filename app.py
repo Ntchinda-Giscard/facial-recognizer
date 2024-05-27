@@ -1,5 +1,5 @@
 import os
-import cv2
+# import cv2
 from facedb import FaceDB
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
