@@ -44,7 +44,7 @@ RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
 
 # Create the directories and set permissions
-RUN mkdir /code/facedata /code/UPLOAD /code/FIND && chmod -R 777 /code/facedata /code/UPLOAD /code/FIND
+RUN mkdir /code/facedata /code/UPLOAD /code/FIND //.deepface && chmod -R 777 /code/facedata /code/UPLOAD /code/FIND //.deepface
 
 # Create a non-root user and group
 RUN groupadd -r appgroup && useradd -r -g appgroup -d /code -s /sbin/nologin appuser
