@@ -20,7 +20,7 @@ app.add_middleware(
 
 
 pc = Pinecone(api_key="bc89edcc-47ce-4528-8aa7-c8250226aeff")
-index = pc.Index("quickstart")
+index = pc.Index("image-search")
 
 # Create a FaceDB instance and specify where to store the database
 # db = FaceDB(
@@ -139,10 +139,31 @@ async def read_items():
 
 @app.post("/add-user")
 async def add_user(image: UploadFile = File(...), name: str = Form(...), id: str = Form(...)):
-    image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
-    with open(image_path, "wb") as buffer:
-        buffer.write(await image.read())
+
+    try:
+        image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
+        with open(image_path, "wb") as buffer:
+            buffer.write(await image.read())
+        known_image = face_recognition.load_image_file(image_path)
+        encoding = face_recognition.face_encodings(known_image)[0]
+
+        index.upsert(
+            vectors=[
+                {
+                    "id": id,
+                    "values" : encoding,
+                    "metadata" : {"name": name}
+                }
+            ],
+            namespace="ns1"
+        )
+
+        return JSONResponse(content={"message": f"Image {image.filename} saved successfully and name '{name}' received.", "status_code": 200})
+    except Exception as e:
+        return {"message": f"Internal server error {str(e)} ", "status_code" : 500}
+
     
+ 
 
 
 
