@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from pinecone import Pinecone
 import face_recognition
 from deepface import DeepFace
+from utils import lookup_user
 
 
 app = FastAPI()
@@ -140,7 +141,7 @@ async def read_items():
 #     return JSONResponse(content={"message": f"Image {image.filename} saved successfully and name '{name}' received."})
 
 @app.post("/add-user")
-async def add_user(image: UploadFile = File(...), name: str = Form(...), id: str = Form(...)):
+async def add_user(image: UploadFile = File(...), name: str = Form(...), id: int = Form(...), location_id: int = Form(...)):
 
     try:
         image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
@@ -149,6 +150,12 @@ async def add_user(image: UploadFile = File(...), name: str = Form(...), id: str
 
         embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
         embedding_vector = embedding[0]['embedding']
+
+        result_data = lookup_user(index, embedding_vector)
+
+        if(result_data["matches"][0]["score"] >= 79.00):
+
+            return JSONResponse(content={"message": "A similar user already exist", "status_code": 202, "data": result_data})
 
 
 
@@ -180,26 +187,13 @@ async def recognize(image: UploadFile = File(...)):
         # Convert the encoding to a list
         encoding_list = embedding_vector
 
-        result = index.query(
-            namespace="ns1",
-            vector=encoding_list,
-            top_k=1,
-            include_metadata=True,
-        )
+        result_data = lookup_user(index, encoding_list)
 
-        # Convert the QueryResponse to a serializable format
-        result_data = {
-            "matches": [
-                {
-                    "id": match.id,
-                    "score": match.score,
-                    "metadata": match.metadata
-                }
-                for match in result.matches
-            ]
-        }
-
-        return JSONResponse(content={"message": "Results", "data": result_data})
+        if(result_data["matches"][0]["score"] >= 79.00):
+            return JSONResponse(content={"message": "User found", "data": result_data, "status_code" : 200})
+        else:
+            return JSONResponse(content={"message": "User not found", "status_code" : 200})
+        
     except Exception as e:
         return JSONResponse(content={"message": f"Internal server error {str(e)}", "status_code": 500})
 
