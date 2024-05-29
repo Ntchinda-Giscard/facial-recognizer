@@ -20,7 +20,7 @@ app.add_middleware(
 
 
 pc = Pinecone(api_key="bc89edcc-47ce-4528-8aa7-c8250226aeff")
-index = pc.Index("image-search")
+index = pc.Index("image-reg")
 
 # Create a FaceDB instance and specify where to store the database
 # db = FaceDB(
