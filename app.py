@@ -173,6 +173,7 @@ async def recognize(image: UploadFile=File(...)):
         print(f"Load images")
         encoding = face_recognition.face_encodings(unknown_image)[0]
         print(f" [*]--- Load encodings ---> {encoding} ")
+        print(f" [*] --- lenght of array ---> {len()}")
 
         result = index.query(
             namespace="ns1",
