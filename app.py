@@ -163,7 +163,6 @@ async def add_user(image: UploadFile = File(...), name: str = Form(...), id: str
             ],
             namespace="ns1"
         )
-
         return JSONResponse(content={"message": f"Image {image.filename} saved successfully and name '{name}' received.", "status_code": 200})
     except Exception as e:
         return {"message": f"Internal server error {str(e)} ", "status_code" : 500}
