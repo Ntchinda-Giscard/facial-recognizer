@@ -184,7 +184,6 @@ async def recognize(image: UploadFile = File(...)):
             namespace="ns1",
             vector=encoding_list,
             top_k=1,
-            include_values=True,
             include_metadata=True,
         )
 
