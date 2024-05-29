@@ -180,7 +180,8 @@ async def recognize(image: UploadFile=File(...)):
             top_k=2,
             include_values=True,
             include_metadata=True,
-        )  
+        ) 
+        print(f"[*]--- Query result ---> {result}") 
         return JSONResponse(content={"message": "Results", "data": result})
     except Exception as e:
         return {"message": f"Internal server error {str(e)} ", "status_code": 500 }
