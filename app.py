@@ -189,7 +189,7 @@ async def recognize(image: UploadFile = File(...)):
 
         result_data = lookup_user(index, encoding_list)
 
-        if(result_data["matches"][0]["score"] >= 79.00):
+        if(result_data["matches"][0]["score"] >= 0.7900):
             return JSONResponse(content={"message": "User found", "data": result_data, "status_code" : 200, "score": result_data["matches"][0]["score"]})
         else:
             return JSONResponse(content={"message": "User not found", "status_code" : 404, "data": result_data, "score": result_data["matches"][0]["score"]})
