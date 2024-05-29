@@ -182,7 +182,7 @@ async def recognize(image: UploadFile = File(...)):
         print(f"[*]--- Load encodings ---> {embedding_vector} ")
 
         # Convert the encoding to a list
-        encoding_list = embedding_vector.tolist()
+        encoding_list = embedding_vector
         print(f"[*] --- Encoding list ---> {encoding_list}")
 
         result = index.query(
