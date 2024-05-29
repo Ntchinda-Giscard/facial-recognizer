@@ -3,3 +3,4 @@ fastapi
 uvicorn
 pinecone-client
 deepface
+tf-keras
