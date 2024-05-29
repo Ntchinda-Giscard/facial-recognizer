@@ -162,30 +162,47 @@ async def add_user(image: UploadFile = File(...), name: str = Form(...), id: str
     except Exception as e:
         return {"message": f"Internal server error {str(e)} ", "status_code" : 500}
 
+
 @app.post("/recognize")
-async def recognize(image: UploadFile=File(...)):
+async def recognize(image: UploadFile = File(...)):
     try:
         image_path = os.path.join(FIND, image.filename)
         with open(image_path, "wb") as buffer:
             buffer.write(await image.read())
+        
         print(f"[*]---- file path --> {image_path}")
         unknown_image = face_recognition.load_image_file(image_path)
         print(f"Load images")
         encoding = face_recognition.face_encodings(unknown_image)[0]
-        print(f" [*]--- Load encodings ---> {encoding} ")
-        print(f" [*] --- lenght of array ---> {len(encoding)}")
+        print(f"[*]--- Load encodings ---> {encoding} ")
+
+        # Convert the encoding to a list
+        encoding_list = encoding.tolist()
 
         result = index.query(
             namespace="ns1",
-            vector=encoding,
+            vector=encoding_list,
             top_k=2,
             include_values=True,
             include_metadata=True,
-        ) 
-        print(f"[*]--- Query result ---> {result}") 
-        return JSONResponse(content={"message": "Results", "data" : {"matches" : result}})
+        )
+
+        # Convert the QueryResponse to a serializable format
+        result_data = {
+            "matches": [
+                {
+                    "id": match.id,
+                    "score": match.score,
+                    "metadata": match.metadata
+                }
+                for match in result.matches
+            ]
+        }
+
+        return JSONResponse(content={"message": "Results", "data": result_data})
     except Exception as e:
-        return {"message": f"Internal server error {str(e)} ", "status_code": 500 }
+        return JSONResponse(content={"message": f"Internal server error {str(e)}", "status_code": 500})
+
 
 
  
