@@ -4,7 +4,7 @@ import requests
 url = "https://ntchinda-giscard-facial-reg.hf.space/recognize"
 
 # Define the path to the image file you want to upload
-file_path = "IMG_0603.jpg"
+file_path = "francisman.jpeg"
 
 # Open the file in binary mode
 with open(file_path, 'rb') as file:

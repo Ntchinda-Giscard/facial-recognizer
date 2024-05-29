@@ -173,11 +173,11 @@ async def recognize(image: UploadFile = File(...)):
         print(f"[*]---- file path --> {image_path}")
         unknown_image = face_recognition.load_image_file(image_path)
         print(f"Load images")
-        encoding = face_recognition.face_encodings(unknown_image)[0]
-        print(f"[*]--- Load encodings ---> {encoding} ")
+        new_encoding = face_recognition.face_encodings(unknown_image)[0]
+        print(f"[*]--- Load encodings ---> {new_encoding} ")
 
         # Convert the encoding to a list
-        encoding_list = encoding.tolist()
+        encoding_list = new_encoding.tolist()
 
         result = index.query(
             namespace="ns1",
