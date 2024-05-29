@@ -176,13 +176,13 @@ async def recognize(image: UploadFile = File(...)):
             buffer.write(await image.read())
         
         print(f"[*]---- file path --> {image_path}")
-        unknown_image = face_recognition.load_image_file(image_path)
+        embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
         print(f"Load images")
-        new_encoding = face_recognition.face_encodings(unknown_image)[0]
-        print(f"[*]--- Load encodings ---> {new_encoding} ")
+        embedding_vector = embedding[0]['embedding']
+        print(f"[*]--- Load encodings ---> {embedding_vector} ")
 
         # Convert the encoding to a list
-        encoding_list = new_encoding.tolist()
+        encoding_list = embedding_vector.tolist()
         print(f"[*] --- Encoding list ---> {encoding_list}")
 
         result = index.query(
