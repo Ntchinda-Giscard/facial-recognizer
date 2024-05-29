@@ -162,7 +162,27 @@ async def add_user(image: UploadFile = File(...), name: str = Form(...), id: str
     except Exception as e:
         return {"message": f"Internal server error {str(e)} ", "status_code" : 500}
 
-    
+@app.post("/recognize")
+async def recognize(image: UploadFile=File(...)):
+    try:
+        image_path = os.path.join(FIND, image.filename)
+        with open(image_path, "wb") as buffer:
+            buffer.write(await image.read())
+        unknown_image = face_recognition.load_image_file(image_path)
+        encoding = face_recognition.face_encodings(unknown_image)[0]
+
+        result = index.query(
+            namespace="ns1",
+            vector=encoding,
+            top_k=2,
+            include_values=True,
+            include_metadata=True,
+        )  
+        return JSONResponse(content={"message": "Results", "data": result})
+    except Exception as e:
+        return {"message": f"Internal server error {str(e)} ", "status_code": 500 }
+
+
  
 
 
