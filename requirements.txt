@@ -1,3 +1,4 @@
 facedb
 fastapi
 uvicorn
+pinecone-client

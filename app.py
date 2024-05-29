@@ -5,6 +5,8 @@ from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.responses import JSONResponse
+from pinecone import Pinecone
+import face_recognition
 
 app = FastAPI()
 
@@ -16,10 +18,15 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+
+pc = Pinecone(api_key="bc89edcc-47ce-4528-8aa7-c8250226aeff")
+index = pc.Index("quickstart")
+
 # Create a FaceDB instance and specify where to store the database
-db = FaceDB(
-    path="facedata",
-)
+# db = FaceDB(
+#     path="facedata",
+# )
+
 UPLOAD_DIRECTORY = "UPLOAD"
 FIND = "FIND"
 os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
@@ -117,31 +124,40 @@ async def read_items():
     return HTMLResponse(content=html_content, status_code=200)
 
 # Add a new face to the database
-@app.post("/save-user")
-async def save_user(image: UploadFile = File(...), name: str = Form(...)):
-    # Save the image to disk
+# @app.post("/save-user")
+# async def save_user(image: UploadFile = File(...), name: str = Form(...)):
+#     # Save the image to disk
+#     image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
+#     with open(image_path, "wb") as buffer:
+#         buffer.write(await image.read())
+#     db.add(name, img=image_path)
+
+#     # Print the name
+#     print(name)
+
+#     return JSONResponse(content={"message": f"Image {image.filename} saved successfully and name '{name}' received."})
+
+@app.post("/add-user")
+async def add_user(image: UploadFile = File(...), name: str = Form(...), id: str = Form(...)):
     image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
     with open(image_path, "wb") as buffer:
         buffer.write(await image.read())
-    db.add(name, img=image_path)
-
-    # Print the name
-    print(name)
-
-    return JSONResponse(content={"message": f"Image {image.filename} saved successfully and name '{name}' received."})
-
-@app.post("/find-user")
-async def find_user(image: UploadFile=File(...)):
-    image_path = os.path.join(FIND, image.filename)
-    with open(image_path, "wb") as buffer:
-        buffer.write(await image.read())
     
-    result = db.recognize(img=image_path)
 
-    if result["confidence"] >= 79.00:
-        return JSONResponse(content={"message": "User found","status_code": 200 , "data" : { "name": result['id'][:-23], 'conf': result['confidence'] }})
-    else:
-        JSONResponse(content={"message": "Unknown user", "status_code": 400})
+
+
+# @app.post("/find-user")
+# async def find_user(image: UploadFile=File(...)):
+#     image_path = os.path.join(FIND, image.filename)
+#     with open(image_path, "wb") as buffer:
+#         buffer.write(await image.read())
+    
+#     result = db.recognize(img=image_path)
+
+#     if result["confidence"] >= 79.00:
+#         return JSONResponse(content={"message": "User found","status_code": 200 , "data" : { "name": result['id'][:-23], 'conf': result['confidence'] }})
+#     else:
+#         JSONResponse(content={"message": "Unknown user", "status_code": 400})
 
         
 if __name__ == "__main__":
