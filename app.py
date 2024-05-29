@@ -146,8 +146,7 @@ async def add_user(image: UploadFile = File(...), name: str = Form(...), id: str
         image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
         with open(image_path, "wb") as buffer:
             buffer.write(await image.read())
-        # known_image = face_recognition.load_image_file(image_path)
-        # encoding = face_recognition.face_encodings(known_image)[0]
+
         embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
         embedding_vector = embedding[0]['embedding']
 
