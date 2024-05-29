@@ -1,2 +1,5 @@
 venv/
 *.jpg
+venv/
+UPLOAD/
+FIND/
