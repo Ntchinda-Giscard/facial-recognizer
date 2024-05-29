@@ -29,19 +29,6 @@ index = pc.Index("image-reg")
 #     path="facedata",
 # )
 
-os.environ["PINECONE_API_KEY"] = "bc89edcc-47ce-4528-8aa7-c8250226aeff"
-# os.environ["PINECONE_ENVIRONMENT"] = "YOUR_ENVIRONMENT_NAME"
-
-db = FaceDB(
-    path="facedata",
-    metric='euclidean',
-    database_backend='pinecone',
-    index_name='faces',
-    embedding_dim=128,
-    module='face_recognition',
-)
-
-
 UPLOAD_DIRECTORY = "UPLOAD"
 FIND = "FIND"
 os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
@@ -139,46 +126,46 @@ async def read_items():
     return HTMLResponse(content=html_content, status_code=200)
 
 # Add a new face to the database
+# @app.post("/save-user")
+# async def save_user(image: UploadFile = File(...), name: str = Form(...)):
+#     # Save the image to disk
+#     image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
+#     with open(image_path, "wb") as buffer:
+#         buffer.write(await image.read())
+#     db.add(name, img=image_path)
+
+#     # Print the name
+#     print(name)
+
+#     return JSONResponse(content={"message": f"Image {image.filename} saved successfully and name '{name}' received."})
+
 @app.post("/add-user")
-async def save_user(image: UploadFile = File(...), name: str = Form(...), id: str=Form(...)):
-    # Save the image to disk
-    image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
-    with open(image_path, "wb") as buffer:
-        buffer.write(await image.read())
-    
-    try:    
-        db.add(name={"name": name, "id": id}, img=image_path)
+async def add_user(image: UploadFile = File(...), name: str = Form(...), id: str = Form(...)):
+
+    try:
+        image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
+        with open(image_path, "wb") as buffer:
+            buffer.write(await image.read())
+        # known_image = face_recognition.load_image_file(image_path)
+        # encoding = face_recognition.face_encodings(known_image)[0]
+        embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
+        embedding_vector = embedding[0]['embedding']
+
+
+
+        index.upsert(
+            vectors=[
+                {
+                    "id": id,
+                    "values" : embedding_vector,
+                    "metadata" : {"name": name, "id": id}
+                }
+            ],
+            namespace="ns1"
+        )
         return JSONResponse(content={"message": f"Image {image.filename} saved successfully and name '{name}' received.", "status_code": 200})
     except Exception as e:
         return {"message": f"Internal server error {str(e)} ", "status_code" : 500}
-
-# @app.post("/add-user")
-# async def add_user(image: UploadFile = File(...), name: str = Form(...), id: str = Form(...)):
-
-#     try:
-#         image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
-#         with open(image_path, "wb") as buffer:
-#             buffer.write(await image.read())
-#         # known_image = face_recognition.load_image_file(image_path)
-#         # encoding = face_recognition.face_encodings(known_image)[0]
-#         embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
-#         embedding_vector = embedding[0]['embedding']
-
-
-
-#         index.upsert(
-#             vectors=[
-#                 {
-#                     "id": id,
-#                     "values" : embedding_vector,
-#                     "metadata" : {"name": name, "id": id}
-#                 }
-#             ],
-#             namespace="ns1"
-#         )
-#         return JSONResponse(content={"message": f"Image {image.filename} saved successfully and name '{name}' received.", "status_code": 200})
-#     except Exception as e:
-#         return {"message": f"Internal server error {str(e)} ", "status_code" : 500}
 
 
 @app.post("/recognize")
@@ -197,7 +184,7 @@ async def recognize(image: UploadFile = File(...)):
         result = index.query(
             namespace="ns1",
             vector=encoding_list,
-            top_k=2,
+            top_k=1,
             include_values=True,
             include_metadata=True,
         )
