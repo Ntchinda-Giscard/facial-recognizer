@@ -5,10 +5,10 @@ import uuid
 import requests
 
 # Define the endpoint URL
-url = "https://ntchinda-giscard-facial-reg.hf.space/recognize"
+url = "https://ntchinda-giscard-facial-reg.hf.space/add-user"
 
 # Define the file and data to be sent
-file_path = "fran2.jpeg"
+file_path = "francisman.jpeg"
 name = "Francis"
 id = str(uuid.uuid4())
 
@@ -21,7 +21,7 @@ with open(file_path, 'rb') as file:
     # Send the POST request
     response = requests.post(url, 
                              files=files, 
-                            #  data=data
+                             data=data
                              )
     
     # Print the response from the server
