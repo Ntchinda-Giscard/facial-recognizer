@@ -164,7 +164,7 @@ async def add_user(image: UploadFile = File(...), name: str = Form(...), id: int
                 {
                     "id": id,
                     "values" : embedding_vector,
-                    "metadata" : {"name": name, "id": id}
+                    "metadata" : {"name": name, "location_id": int(location_id)}
                 }
             ],
             namespace="ns1"
