@@ -2,3 +2,4 @@ facedb
 fastapi
 uvicorn
 pinecone-client
+deepface
