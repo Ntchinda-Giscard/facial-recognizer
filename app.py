@@ -168,8 +168,11 @@ async def recognize(image: UploadFile=File(...)):
         image_path = os.path.join(FIND, image.filename)
         with open(image_path, "wb") as buffer:
             buffer.write(await image.read())
+        print(f"[*]---- file path --> {image_path}")
         unknown_image = face_recognition.load_image_file(image_path)
+        print(f"Load images")
         encoding = face_recognition.face_encodings(unknown_image)[0]
+        print(f" [*]--- Load encodings ---> {encoding} ")
 
         result = index.query(
             namespace="ns1",
