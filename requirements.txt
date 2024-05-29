@@ -4,3 +4,4 @@ uvicorn
 pinecone-client
 deepface
 tf-keras
+tensorflow==2.12
