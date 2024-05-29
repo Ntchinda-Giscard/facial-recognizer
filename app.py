@@ -175,15 +175,11 @@ async def recognize(image: UploadFile = File(...)):
         with open(image_path, "wb") as buffer:
             buffer.write(await image.read())
         
-        print(f"[*]---- file path --> {image_path}")
         embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
-        print(f"Load images")
         embedding_vector = embedding[0]['embedding']
-        print(f"[*]--- Load encodings ---> {embedding_vector} ")
 
         # Convert the encoding to a list
         encoding_list = embedding_vector
-        print(f"[*] --- Encoding list ---> {encoding_list}")
 
         result = index.query(
             namespace="ns1",
