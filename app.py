@@ -178,6 +178,7 @@ async def recognize(image: UploadFile = File(...)):
 
         # Convert the encoding to a list
         encoding_list = new_encoding.tolist()
+        print(f"[*] --- Encoding list ---> {encoding_list}")
 
         result = index.query(
             namespace="ns1",
