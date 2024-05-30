@@ -268,7 +268,7 @@ async def read_items():
 #     return JSONResponse(content={"message": f"Image {image.filename} saved successfully and name '{name}' received."})
 
 @app.post("/add-user")
-async def add_user(image: UploadFile = File(...), name: str = Form(...), id: int = Form(...), location_id: int = Form(...)):
+async def add_user(image: UploadFile = File(...), name: str = Form(...), id: str = Form(...), location_id: str = Form(...)):
 
     try:
         image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
