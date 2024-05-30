@@ -1,4 +1,5 @@
 import os
+from typing import Any, Dict, List
 # import cv2
 # from facedb import FaceDB
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
@@ -252,10 +253,53 @@ async def read_items():
 
 
 
-@app.post("/add-user")
-async def add_user(image: UploadFile = File(...), companyId: str = Form(...), name: str = Form(...), id: str = Form(...), location_id: str = Form(...)):
+# Model for the form data
+class AddUserForm(BaseModel):
+    companyId: str
+    name: str
+    id: str
+    location_id: str
 
+# Model for the lookup user result
+class Match(BaseModel):
+    score: float
+    id: str
+    metadata: Dict[str, Any]
+
+class LookupUserResult(BaseModel):
+    matches: List[Match]
+
+# Model for the add user response
+class AddUserResponse(BaseModel):
+    message: str
+    status_code: int
+    data: LookupUserResult = None
+
+def lookup_user(index, embedding_vector):
+    # Simulating a function that returns lookup data
+    # You need to replace this with the actual lookup logic
+    return {
+        "matches": [
+            {
+                "score": 80.0,
+                "id": "existing_user_id",
+                "metadata": {"name": "Existing User"}
+            }
+        ]
+    }
+
+@app.post("/add-user", response_model=AddUserResponse)
+async def add_user(
+    image: UploadFile = File(...),
+    companyId: str = Form(...),
+    name: str = Form(...),
+    id: str = Form(...),
+    location_id: str = Form(...)
+):
     try:
+        # Ensure the upload directory exists
+        os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+
         image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
         with open(image_path, "wb") as buffer:
             buffer.write(await image.read())
@@ -264,26 +308,29 @@ async def add_user(image: UploadFile = File(...), companyId: str = Form(...), na
         embedding_vector = embedding[0]['embedding']
 
         result_data = lookup_user(index, embedding_vector)
-
-        if(result_data["matches"][0]["score"] >= 79.00):
-
-            return JSONResponse(content={"message": "A similar user already exist", "status_code": 202, "data": result_data})
-
-
+        if result_data["matches"][0]["score"] >= 79.00:
+            return JSONResponse(
+                content={"message": "A similar user already exist", "status_code": 202, "data": result_data},
+                status_code=202
+            )
 
         index.upsert(
             vectors=[
                 {
                     "id": id,
-                    "values" : embedding_vector,
-                    "metadata" : {"name": name, "location_id": int(location_id), "id": id}
+                    "values": embedding_vector,
+                    "metadata": {"name": name, "location_id": int(location_id), "id": id}
                 }
             ],
             namespace="ns1"
         )
-        return JSONResponse(content={"message": f"Image {image.filename} saved successfully and name '{name}' received.", "status_code": 200})
+
+        return JSONResponse(
+            content={"message": f"Image {image.filename} saved successfully and name '{name}' received.", "status_code": 200},
+            status_code=200
+        )
     except Exception as e:
-        return {"message": f"Internal server error {str(e)} ", "status_code" : 500}
+        raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
 
 
 @app.post("/recognize")
