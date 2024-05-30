@@ -45,6 +45,35 @@ async def read_items():
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>API Documentation</title>
         <style>
+                body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f4;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007FFF;
+            color: white;
+        }
+        pre {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
         .text {
             font-family: Arial, sans-serif;
             font-size: 16px;
@@ -114,9 +143,107 @@ async def read_items():
     </header>
     <body>
         <div class="container">
-            <h1>Welcome to VVIMS AI App! 😊</h1>
+            <h1>Welcome to FACIAL-REG AI App! 😊</h1>
             <p class="text"> Explore the wonders of our OCR and ANPR APIs! These powerful tools utilize AI to effortlessly decipher and recognize elements within Cameroonian ID cards, extracting valuable information with just a simple call to the <code> "/idextract" </code> endpoint. With our technology, you'll gain the ability to see beyond the surface and effortlessly identify vehicle license plates using the <code>"/carplate"</code> endpoint. The power is now yours to wield. Unleash the full potential of these tools and revolutionize your workflow..</p>
             <p>Let this app be the beginning of your journey towards greatness!</p>
+            <h1>API Documentation for <code>add_user</code></h1>
+    
+            <h2>Endpoint</h2>
+            <p><code>POST /add-user</code></p>
+            
+            <h2>Description</h2>
+            <p>This endpoint allows users to add a new user by uploading an image and providing additional information. The system checks for similar existing users based on the facial embedding generated from the uploaded image. If a similar user already exists, it returns a message indicating so. Otherwise, it saves the new user’s information.</p>
+            
+            <h2>Request Headers</h2>
+            <p><code>Content-Type: multipart/form-data</code></p>
+            
+            <h2>Request Body</h2>
+            <p>The request body should be sent as <code>multipart/form-data</code> and include the following fields:</p>
+                <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>image</td>
+                    <td>file (image)</td>
+                    <td>The image file of the user to be uploaded.</td>
+                </tr>
+                <tr>
+                    <td>name</td>
+                    <td>string</td>
+                    <td>The name of the user.</td>
+                </tr>
+                <tr>
+                    <td>id</td>
+                    <td>integer</td>
+                    <td>The unique identifier for the user.</td>
+                </tr>
+                <tr>
+                    <td>location_id</td>
+                    <td>integer</td>
+                    <td>The location identifier for the user.</td>
+                </tr>
+            </tbody>
+        </table>
+            <h2>Example</h2>
+    <p>Here is an example of how to structure the request using <code>curl</code>:</p>
+    <pre><code>curl -X POST "http://your-api-url/add-user" \
+  -H "Content-Type: multipart/form-data" \
+  -F "image=@/path/to/your/image.jpg" \
+  -F "name=John Doe" \
+  -F "id=12345" \
+  -F "location_id=67890"</code></pre>
+    
+    <h2>Response</h2>
+    
+    <h3>Success Response (User added successfully)</h3>
+    <p><code>Status Code: 200 OK</code></p>
+    <p><code>Content-Type: application/json</code></p>
+    <pre><code>{
+    "message": "Image image.jpg saved successfully and name 'John Doe' received.",
+    "status_code": 200
+}</code></pre>
+    
+    <h3>Success Response (Similar user already exists)</h3>
+    <p><code>Status Code: 202 Accepted</code></p>
+    <p><code>Content-Type: application/json</code></p>
+    <pre><code>{
+    "message": "A similar user already exists",
+    "status_code": 202,
+    "data": {
+        "matches": [
+            {
+                "score": 80.12,
+                "metadata": {
+                    "name": "Jane Doe",
+                    "location_id": 67890,
+                    "id": 12346
+                }
+            }
+        ]
+    }
+}</code></pre>
+    
+    <h3>Error Response</h3>
+    <p><code>Status Code: 500 Internal Server Error</code></p>
+    <p><code>Content-Type: application/json</code></p>
+    <pre><code>{
+    "message": "Internal server error &lt;error_message&gt;",
+    "status_code": 500
+}</code></pre>
+    
+    <h2>Detailed Explanation</h2>
+    <ul>
+        <li><strong>Headers:</strong> The endpoint accepts a <code>Content-Type</code> header of <code>multipart/form-data</code>, indicating that the request body will contain multiple parts, including file uploads.</li>
+        <li><strong>Request Body:</strong> The body includes the image file, name, id, and location_id. These parameters are necessary to create a new user entry and check for existing similar users.</li>
+        <li><strong>Response:</strong> The response varies depending on whether a similar user already exists. If a similar user is found (based on a matching score of 79 or higher), it returns a 202 status code with a message and data about the match. If no similar user is found, it adds the new user and returns a 200 status code with a success message. If an error occurs, it returns a 500 status code with an error message.</li>
+    </ul>
+
         </div>
         <div class="footer">
             <p>Made with ❤️ by Ntchinda Giscard</p>
