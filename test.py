@@ -1,7 +1,7 @@
 import requests
 
 # Define the URL of the webhook endpoint
-url = "http://localhost:8000/webhook"
+url = "https://ntchinda-giscard-facial-reg.hf.space/webhook"
 
 # Define the payload
 payload = {
