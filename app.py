@@ -1,13 +1,14 @@
 import os
 # import cv2
-from facedb import FaceDB
-from fastapi import FastAPI, File, Form, UploadFile
+# from facedb import FaceDB
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.responses import JSONResponse
 from pinecone import Pinecone
 import face_recognition
 from deepface import DeepFace
+from pydantic import BaseModel
 from utils import lookup_user
 
 
@@ -25,10 +26,6 @@ app.add_middleware(
 pc = Pinecone(api_key="bc89edcc-47ce-4528-8aa7-c8250226aeff")
 index = pc.Index("image-reg")
 
-# Create a FaceDB instance and specify where to store the database
-# db = FaceDB(
-#     path="facedata",
-# )
 
 UPLOAD_DIRECTORY = "UPLOAD"
 FIND = "FIND"
@@ -253,19 +250,7 @@ async def read_items():
     """
     return HTMLResponse(content=html_content, status_code=200)
 
-# Add a new face to the database
-# @app.post("/save-user")
-# async def save_user(image: UploadFile = File(...), name: str = Form(...)):
-#     # Save the image to disk
-#     image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
-#     with open(image_path, "wb") as buffer:
-#         buffer.write(await image.read())
-#     db.add(name, img=image_path)
 
-#     # Print the name
-#     print(name)
-
-#     return JSONResponse(content={"message": f"Image {image.filename} saved successfully and name '{name}' received."})
 
 @app.post("/add-user")
 async def add_user(image: UploadFile = File(...), name: str = Form(...), id: str = Form(...), location_id: str = Form(...)):
@@ -324,25 +309,26 @@ async def recognize(image: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse(content={"message": f"Internal server error {str(e)}", "status_code": 500})
 
+# Define the webhook payload model
+class WebhookPayload(BaseModel):
+    company_id: str
+    company_name: str
 
+@app.post("/webhook")
+async def create_pinecone_index(payload: WebhookPayload):
+    company_id = payload.company_id
+    company_name = payload.company_name
 
- 
-
-
-
-# @app.post("/find-user")
-# async def find_user(image: UploadFile=File(...)):
-#     image_path = os.path.join(FIND, image.filename)
-#     with open(image_path, "wb") as buffer:
-#         buffer.write(await image.read())
-    
-#     result = db.recognize(img=image_path)
-
-#     if result["confidence"] >= 79.00:
-#         return JSONResponse(content={"message": "User found","status_code": 200 , "data" : { "name": result['id'][:-23], 'conf': result['confidence'] }})
-#     else:
-#         JSONResponse(content={"message": "Unknown user", "status_code": 400})
-
+    # Create an index in Pinecone
+    index_name = f"company-index-{company_id}-{company_name}"
+    if index_name not in pc.list_indexes():
+        try:
+            pc.create_index(index_name, dimension=128)  # Assuming 128 dimensions, change as needed
+            return {"message": f"Index '{index_name}' created successfully"}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
+    else:
+        return {"message": f"Index '{index_name}' already exists"}
         
 if __name__ == "__main__":
     import uvicorn
