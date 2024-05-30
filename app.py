@@ -384,7 +384,10 @@ async def create_pinecone_index(payload: WebhookPayload):
                     region="us-east-1"
                 )
             )
-            response = requests.post("https://129f-129-0-189-24.ngrok-free.app/api/v1/index/create", json=data)
+            try:
+                response = requests.post("https://129f-129-0-189-24.ngrok-free.app/api/v1/index/create", json=data)
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
             
             if (response):
                 return JSONResponse(content={"message": "Index created successfully", "status_code": 201, "data" : response})
