@@ -363,15 +363,15 @@ class WebhookPayload(BaseModel):
 
 @app.post("/webhook")
 async def create_pinecone_index(payload: WebhookPayload):
-    company_id = payload.company_id
-    company_name = payload.company_name
+    company_id = payload.company_id.lower()
+    company_name = payload.company_name.lower()
 
     # Create an index in Pinecone
     index_name = f"{company_id}-{company_name}"
     if index_name not in pc.list_indexes():
         try:
             data = {
-                "index": index_name.lower(),
+                "index": index_name,
                 "companyId": payload.company_id
             }
             
@@ -386,8 +386,8 @@ async def create_pinecone_index(payload: WebhookPayload):
             )
             response = requests.post("https://129f-129-0-189-24.ngrok-free.app/api/v1/index/create", json=data)
             
-            if (response.status == 201):
-                return JSONResponse(content={"message": "Index created successfully", "status_code": 201, "data" : result})
+            if (response):
+                return JSONResponse(content={"message": "Index created successfully", "status_code": 201, "data" : response})
 
             return {"message": f"Index '{index_name}' created successfully", "data": result }
         except Exception as e:
