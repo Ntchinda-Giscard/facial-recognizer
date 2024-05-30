@@ -24,8 +24,8 @@ app.add_middleware(
 
 
 pc = Pinecone(api_key="bc89edcc-47ce-4528-8aa7-c8250226aeff")
-index = pc.Index("image-reg")
-
+# index = pc.Index("image-reg")
+index = None
 
 UPLOAD_DIRECTORY = "UPLOAD"
 FIND = "FIND"

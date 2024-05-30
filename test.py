@@ -1,29 +1,22 @@
-
-
-
-import uuid
 import requests
 
-# Define the endpoint URL
-url = "https://ntchinda-giscard-facial-reg.hf.space/add-user"
+# Define the URL of the webhook endpoint
+url = "http://localhost:8000/webhook"
 
-# Define the file and data to be sent
-file_path = "IMG_0603.jpg"
-name = "Giscard"
-id = str(uuid.uuid4())
+# Define the payload
+payload = {
+    "company_id": "12345",
+    "company_name": "example_company"
+}
 
-# Open the file in binary mode
-with open(file_path, 'rb') as file:
-    # Create a dictionary with the form data
-    files = {'image': file}
-    data = {'name': name, 'id': id}
-    
-    # Send the POST request
-    response = requests.post(url, 
-                             files=files, 
-                             data=data
-                             )
-    
-    # Print the response from the server
-    print(response.status_code)
-    print(response.json())
+# Set the headers
+headers = {
+    "Content-Type": "application/json"
+}
+
+# Send the POST request
+response = requests.post(url, json=payload, headers=headers)
+
+# Print the response
+print("Status Code:", response.status_code)
+print("Response JSON:", response.json())
