@@ -323,7 +323,7 @@ async def create_pinecone_index(payload: WebhookPayload):
     index_name = f"company-index-{company_id}-{company_name}"
     if index_name not in pc.list_indexes():
         try:
-            pc.create_index(index_name, dimension=128)  # Assuming 128 dimensions, change as needed
+            pc.create_index(index_name, dimension=4096)  # Assuming 128 dimensions, change as needed
             return {"message": f"Index '{index_name}' created successfully"}
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
