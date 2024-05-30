@@ -291,7 +291,7 @@ def lookup_user(index, embedding_vector):
 @app.post("/add-user", response_model=AddUserResponse)
 async def add_user(
     image: UploadFile = File(...),
-    companyId: str = Form(...),
+    company_id: str = Form(...),
     name: str = Form(...),
     id: str = Form(...),
     location_id: str = Form(...)
