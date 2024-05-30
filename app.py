@@ -5,10 +5,10 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.responses import JSONResponse
-from pinecone import Pinecone
-import face_recognition
+from pinecone import Pinecone, ServerlessSpec
 from deepface import DeepFace
 from pydantic import BaseModel
+import requests
 from utils import lookup_user
 
 
@@ -253,7 +253,7 @@ async def read_items():
 
 
 @app.post("/add-user")
-async def add_user(image: UploadFile = File(...), name: str = Form(...), id: str = Form(...), location_id: str = Form(...)):
+async def add_user(image: UploadFile = File(...), companyId: str = Form(...), name: str = Form(...), id: str = Form(...), location_id: str = Form(...)):
 
     try:
         image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
@@ -320,11 +320,29 @@ async def create_pinecone_index(payload: WebhookPayload):
     company_name = payload.company_name
 
     # Create an index in Pinecone
-    index_name = f"company-index-{company_id}-{company_name}"
+    index_name = f"{company_id}-{company_name}"
     if index_name not in pc.list_indexes():
         try:
-            pc.create_index(index_name, dimension=4096)  # Assuming 128 dimensions, change as needed
-            return {"message": f"Index '{index_name}' created successfully"}
+            data = {
+                    "index": payload.index,
+                    "companyId": payload.companyId
+                }
+            
+            result = pc.create_index(
+                name= index_name,
+                dimension=1536,
+                metric="cosine",
+                spec=ServerlessSpec(
+                    cloud="aws",
+                    region="us-east-1"
+                )
+            )
+            response = requests.post("https://129f-129-0-189-24.ngrok-free.app/api/v1/index/create", json=data)
+            
+            if (response.status == 201):
+                return JSONResponse(content={"message": "Index created successfully", "status_code": 201, "data" : result})
+
+            return {"message": f"Index '{index_name}' created successfully", "data": result }
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
     else:
