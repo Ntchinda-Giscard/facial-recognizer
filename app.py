@@ -369,9 +369,11 @@ async def create_pinecone_index(payload: WebhookPayload):
     # Create an index in Pinecone
     index_name = f"{company_id}-{company_name}"
     indexes = pc.list_indexes().index_list.to_dict()
-    print(indexes["indexes"][0])
+    print(indexes["indexes"])
     print(f"[*] --- Index name {index_name} ")
-    if index_name not in indexes["indexes"][0]:
+    found = any(item.get('name') == index_name for item in indexes["indexes"])
+
+    if not found:
         try:
             data = {
                 "index": index_name,
@@ -399,7 +401,7 @@ async def create_pinecone_index(payload: WebhookPayload):
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
     else:
-        return {"message": f"Index '{index_name}' already exists"}
+        return HTTPException(status_code=400, detail=f"Index '{index_name}' already exists")
         
 if __name__ == "__main__":
     import uvicorn
