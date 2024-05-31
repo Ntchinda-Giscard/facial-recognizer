@@ -328,7 +328,7 @@ async def add_user(
 
     print(data["data"])
 
-    index = pc.Index(data["data"]["data"]["index"])
+    index = pc.Index(data["data"]["data"][0]["index"])
 
     #     result_data = lookup_user(index, embedding_vector)
     #     if result_data["matches"][0]["score"] >= 79.00:
