@@ -324,7 +324,7 @@ async def add_user(
 
         embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
         embedding_vector = embedding[0]['embedding']
-        print(f"[*] --- Data --> {data["data"]["data"]["index"]}")
+        print(data["data"]["data"]["index"])
 
         index = pc.Index(data["data"]["data"]["index"])
 
