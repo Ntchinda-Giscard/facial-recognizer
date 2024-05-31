@@ -265,7 +265,7 @@ async def add_user(image: UploadFile = File(...), companyId: str = Form(...), na
         result_data = lookup_user(index, embedding_vector)
 
         print(result_data)
-        if(result_data["matches"][0]["score"] >= 79.00):
+        if(result_data["matches"][0]["score"] >= 0.79):
 
             return JSONResponse(content={"message": "A similar user already exist", "status_code": 202, "data": result_data})
 
