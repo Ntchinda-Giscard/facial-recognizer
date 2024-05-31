@@ -284,30 +284,32 @@ async def add_user(image: UploadFile = File(...), companyId: str = Form(...), na
         return {"message": f"Internal server error {str(e)} ", "status_code" : 500}
 
 
-# @app.post("/recognize")
-# async def recognize(image: UploadFile = File(...)):
-#     try:
-#         image_path = os.path.join(FIND, image.filename)
-#         with open(image_path, "wb") as buffer:
-#             buffer.write(await image.read())
+@app.post("/recognize")
+async def recognize(image: UploadFile = File(...)):
+    try:
+        image_path = os.path.join(FIND, image.filename)
+        with open(image_path, "wb") as buffer:
+            buffer.write(await image.read())
         
-#         embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
-#         embedding_vector = embedding[0]['embedding']
+        embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
+        embedding_vector = embedding[0]['embedding']
 
-#         # Convert the encoding to a list
-#         encoding_list = embedding_vector
+        # Convert the encoding to a list
+        encoding_list = embedding_vector
 
-#         result_data = lookup_user(index, encoding_list)
+        result_data = lookup_user(index, encoding_list)
 
-#         if(result_data["matches"][0]["score"] >= 0.7900):
-#             return JSONResponse(content={"message": "User found", "data": result_data, "status_code" : 200})
-#         else:
-#             return JSONResponse(content={"message": "User not found", "status_code" : 404, "data": result_data})
+        if(result_data["matches"][0]["score"] >= 0.7900):
+            return JSONResponse(content={"message": "User found", "data": result_data, "status_code" : 200})
+        else:
+            return JSONResponse(content={"message": "User not found", "status_code" : 404, "data": result_data})
         
-#     except Exception as e:
-#         return JSONResponse(content={"message": f"Internal server error {str(e)}", "status_code": 500})
+    except Exception as e:
+        return JSONResponse(content={"message": f"Internal server error {str(e)}", "status_code": 500})
 
-# # Define the webhook payload model
+# Define the webhook payload model
+
+
 # class WebhookPayload(BaseModel):
 #     company_id: str
 #     company_name: str
