@@ -275,19 +275,6 @@ class AddUserResponse(BaseModel):
     status_code: int
     data: LookupUserResult = None
 
-def lookup_user(index, embedding_vector):
-    # Simulating a function that returns lookup data
-    # You need to replace this with the actual lookup logic
-    return {
-        "matches": [
-            {
-                "score": 80.0,
-                "id": "existing_user_id",
-                "metadata": {"name": "Existing User"}
-            }
-        ]
-    }
-
 @app.post("/add-user", response_model=AddUserResponse)
 async def add_user(
     image: UploadFile = File(...),
@@ -333,8 +320,8 @@ async def add_user(
 
         result_data = lookup_user(index, embedding_vector)
         print("Similar result :", result_data)
-        if result_data["matches"][0]["score"] >= 79.00 and result_data["matches"][0]["id"] != "existing_user_id":
-            print("Similar result :", result_data)
+        if result_data["matches"][0]["score"] >= 79.00:
+            # print("Similar result :", result_data)
             return JSONResponse(
                 content={"message": "A similar user already exist", "status_code": 202, "data": result_data},
                 status_code=202
