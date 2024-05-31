@@ -332,6 +332,7 @@ async def add_user(
 
 
         result_data = lookup_user(index, embedding_vector)
+        print("Similar result :", result_data)
         if result_data["matches"][0]["score"] >= 79.00 and result_data["matches"][0]["id"] != "existing_user_id":
             print("Similar result :", result_data)
             return JSONResponse(
