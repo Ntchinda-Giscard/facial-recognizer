@@ -296,7 +296,7 @@ async def add_user(
     id: str = Form(...),
     location_id: str = Form(...)
 ):
-    base_url = "https://8501-129-0-189-24.ngrok-free.app/api/v1/index/company"
+    base_url = "https://fe34-102-244-42-232.ngrok-free.app/api/v1/index/company"
     company_id = company_id
     url = f"{base_url}/{company_id}"
 
