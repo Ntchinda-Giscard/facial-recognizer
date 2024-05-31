@@ -358,7 +358,7 @@ async def recognize(image: UploadFile = File(...)):
 
 # Define the webhook payload model
 class WebhookPayload(BaseModel):
-    company_id: str
+    company_id: int
     company_name: str
 
 @app.post("/webhook")
