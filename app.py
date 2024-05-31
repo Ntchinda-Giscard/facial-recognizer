@@ -369,7 +369,7 @@ async def create_pinecone_index(payload: WebhookPayload):
     # Create an index in Pinecone
     index_name = f"{company_id}-{company_name}"
     indexes = pc.list_indexes().index_list.to_dict()
-    print(indexes["indexes"])
+    print(indexes["indexes"][0])
     print(f"[*] --- Types {type(pc.list_indexes())} ")
     if index_name not in pc.list_indexes():
         try:
