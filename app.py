@@ -401,7 +401,7 @@ async def create_pinecone_index(payload: WebhookPayload):
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
     else:
-        return HTTPException(status_code=400, detail=f"Index '{index_name}' already exists")
+        return HTTPException(status_code=405, detail=f"Index '{index_name}' already exists")
         
 if __name__ == "__main__":
     import uvicorn
