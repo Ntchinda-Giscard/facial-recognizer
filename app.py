@@ -363,7 +363,7 @@ class WebhookPayload(BaseModel):
 
 @app.post("/webhook")
 async def create_pinecone_index(payload: WebhookPayload):
-    company_id = payload.company_id.lower()
+    company_id = payload.company_id
     company_name = payload.company_name.lower()
 
     # Create an index in Pinecone
