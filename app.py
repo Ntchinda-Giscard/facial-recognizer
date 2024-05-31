@@ -333,6 +333,7 @@ async def add_user(
 
         result_data = lookup_user(index, embedding_vector)
         if result_data["matches"][0]["score"] >= 79.00:
+            print("Similar result :", result_data)
             return JSONResponse(
                 content={"message": "A similar user already exist", "status_code": 202, "data": result_data},
                 status_code=202
