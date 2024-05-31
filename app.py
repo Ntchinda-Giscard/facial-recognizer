@@ -330,6 +330,11 @@ async def add_user(
 
     index = pc.Index(data["data"]["data"][0]["index"])
 
+    return JSONResponse(
+            content={"message": f"Image {image.filename} saved successfully and name '{name}' received.", "status_code": 200},
+                status_code=200       
+            )
+
     #     result_data = lookup_user(index, embedding_vector)
     #     if result_data["matches"][0]["score"] >= 79.00:
     #         return JSONResponse(
