@@ -382,7 +382,7 @@ async def create_pinecone_index(payload: WebhookPayload):
             
             result = pc.create_index(
                 name= index_name,
-                dimension=1536,
+                dimension=4096,
                 metric="cosine",
                 spec=ServerlessSpec(
                     cloud="aws",
