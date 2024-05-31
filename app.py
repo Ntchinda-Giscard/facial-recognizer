@@ -326,9 +326,9 @@ async def add_user(
     embedding_vector = embedding[0]['embedding']
     print(data)
 
-    print(data["data"]["data"][0]["index"])
+    index = data["data"]["data"][0]["index"]
 
-    index = pc.Index(data["data"]["data"][0]["index"])
+    index = pc.Index(index)
 
     return JSONResponse(
             content={"message": f"Image {image.filename} saved successfully and name '{name}' received.", "status_code": 200},
