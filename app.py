@@ -23,7 +23,7 @@ app.add_middleware(
 
 
 pc = Pinecone(api_key="bc89edcc-47ce-4528-8aa7-c8250226aeff")
-index = pc.Index("image-reg")
+index = pc.Index("2-vmedia")
 
 
 UPLOAD_DIRECTORY = "UPLOAD"
