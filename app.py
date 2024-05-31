@@ -326,7 +326,7 @@ async def add_user(
     embedding_vector = embedding[0]['embedding']
     print(data)
 
-    print(data["data"])
+    print(data["data"]["data"][0]["index"])
 
     index = pc.Index(data["data"]["data"][0]["index"])
 
