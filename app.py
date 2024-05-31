@@ -395,9 +395,9 @@ async def create_pinecone_index(payload: WebhookPayload):
                 raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
             print(f" [*] --- Posting data {response} ")
             if (response):
-                return JSONResponse(content={"message": "Index created successfully", "status_code": 201, "data" : response})
+                return JSONResponse(content={"message": f"Index {index_name} created successfully", "status_code": 201, "data" : response.json()})
 
-            return {"message": f"Index '{index_name}' created successfully", "data": result }
+            return {"message": f"Index '{index_name}' created successfully but writing to index table failed"}
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
     else:
