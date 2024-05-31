@@ -1,5 +1,4 @@
 import os
-from typing import Any, Dict, List
 # import cv2
 # from facedb import FaceDB
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
@@ -9,7 +8,6 @@ from fastapi.responses import JSONResponse
 from pinecone import Pinecone, ServerlessSpec
 from deepface import DeepFace
 from pydantic import BaseModel
-import requests
 from utils import lookup_user
 
 
@@ -25,8 +23,8 @@ app.add_middleware(
 
 
 pc = Pinecone(api_key="bc89edcc-47ce-4528-8aa7-c8250226aeff")
-# index = pc.Index("image-reg")
-# index = None
+index = pc.Index("image-reg")
+
 
 UPLOAD_DIRECTORY = "UPLOAD"
 FIND = "FIND"
@@ -253,97 +251,38 @@ async def read_items():
 
 
 
-# Model for the form data
-class AddUserForm(BaseModel):
-    companyId: str
-    name: str
-    id: str
-    location_id: str
-
-# Model for the lookup user result
-class Match(BaseModel):
-    score: float
-    id: str
-    metadata: Dict[str, Any]
-
-class LookupUserResult(BaseModel):
-    matches: List[Match]
-
-# Model for the add user response
-class AddUserResponse(BaseModel):
-    message: str
-    status_code: int
-    data: LookupUserResult = None
-
-@app.post("/add-user", response_model=AddUserResponse)
-async def add_user(
-    image: UploadFile = File(...),
-    company_id: str = Form(...),
-    name: str = Form(...),
-    id: str = Form(...),
-    location_id: str = Form(...)
-):
-    base_url = "https://fe34-102-244-42-232.ngrok-free.app/api/v1/index/company"
-    company_id = company_id
-    url = f"{base_url}/{company_id}"
+@app.post("/add-user")
+async def add_user(image: UploadFile = File(...), companyId: str = Form(...), name: str = Form(...), id: str = Form(...), location_id: str = Form(...)):
 
     try:
-        # Perform the GET request
-        response = requests.get(url)
-        response.raise_for_status()  # Raise an HTTPError for bad responses
-        
-        # Extract the JSON data from the response
-        data = response.json()
-        
-        # Print or process the data
-
-    except requests.exceptions.HTTPError as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
-    except requests.exceptions.RequestException as err:
-       raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
-    try:
-        # Ensure the upload directory exists
-        os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
-
         image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
         with open(image_path, "wb") as buffer:
             buffer.write(await image.read())
 
         embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
         embedding_vector = embedding[0]['embedding']
-        print(data)
-
-        index = data["data"]["data"][0]["index"]
-
-        index = pc.Index(index)
-
 
         result_data = lookup_user(index, embedding_vector)
-        print("Similar result :", result_data)
-        if result_data["matches"][0]["score"] >= 79.00:
-            # print("Similar result :", result_data)
-            return JSONResponse(
-                content={"message": "A similar user already exist", "status_code": 202, "data": result_data},
-                status_code=202
-            )
+
+        if(result_data["matches"][0]["score"] >= 79.00):
+
+            return JSONResponse(content={"message": "A similar user already exist", "status_code": 202, "data": result_data})
+
+
 
         index.upsert(
             vectors=[
                 {
                     "id": id,
-                    "values": embedding_vector,
-                    "metadata": {"name": name, "location_id": int(location_id), "id": id}
+                    "values" : embedding_vector,
+                    "metadata" : {"name": name, "location_id": int(location_id), "id": id, "companyId" : companyId}
                 }
             ],
             namespace="ns1"
         )
-
-        return JSONResponse(
-            content={"message": f"Image {image.filename} saved successfully and name '{name}' received."},
-            status_code=200
-        )
+        return JSONResponse(content={"message": f"Image {image.filename} saved successfully and name '{name}' received.", "status_code": 200})
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
+        return {"message": f"Internal server error {str(e)} ", "status_code" : 500}
 
 
 @app.post("/recognize")
@@ -359,7 +298,7 @@ async def recognize(image: UploadFile = File(...)):
         # Convert the encoding to a list
         encoding_list = embedding_vector
 
-        result_data = lookup_user("2-vmedia", encoding_list)
+        result_data = lookup_user(index, encoding_list)
 
         if(result_data["matches"][0]["score"] >= 0.7900):
             return JSONResponse(content={"message": "User found", "data": result_data, "status_code" : 200})
@@ -371,50 +310,35 @@ async def recognize(image: UploadFile = File(...)):
 
 # Define the webhook payload model
 class WebhookPayload(BaseModel):
-    company_id: int
+    company_id: str
     company_name: str
 
 @app.post("/webhook")
 async def create_pinecone_index(payload: WebhookPayload):
     company_id = payload.company_id
-    company_name = payload.company_name.lower()
+    company_name = payload.company_name
+
+    return JSONResponse(content={"message": "Endpoint deprecated"}, status_code=200)
 
     # Create an index in Pinecone
-    index_name = f"{company_id}-{company_name}"
-    indexes = pc.list_indexes().index_list.to_dict()
-    print(indexes["indexes"])
-    print(f"[*] --- Index name {index_name} ")
-    found = any(item.get('name') == index_name for item in indexes["indexes"])
-
-    if not found:
-        try:
-            data = {
-                "index": index_name,
-                "companyId": payload.company_id
-            }
+    # index_name = f"company-index-{company_id}-{company_name}"
+    # if index_name not in pc.list_indexes():
+    #     try:
             
-            result = pc.create_index(
-                name= index_name,
-                dimension=4096,
-                metric="cosine",
-                spec=ServerlessSpec(
-                    cloud="aws",
-                    region="us-east-1"
-                )
-            )
-            try:
-                response = requests.post("https://8501-129-0-189-24.ngrok-free.app/api/v1/index/create", json=data)
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
-            print(f" [*] --- Posting data {response} ")
-            if (response):
-                return JSONResponse(content={"message": f"Index {index_name} created successfully", "status_code": 201, "data" : response.json()})
-
-            return {"message": f"Index '{index_name}' created successfully but writing to index table failed"}
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
-    else:
-        return HTTPException(status_code=405, detail=f"Index '{index_name}' already exists")
+    #         pc.create_index(
+    #             name= index_name,
+    #             dimension=1536,
+    #             metric="cosine",
+    #             spec=ServerlessSpec(
+    #                 cloud="aws",
+    #                 region="us-east-1"
+    #             )
+    #         )
+    #         return {"message": f"Index '{index_name}' created successfully"}
+    #     except Exception as e:
+    #         raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
+    # else:
+    #     return {"message": f"Index '{index_name}' already exists"}
         
 if __name__ == "__main__":
     import uvicorn
