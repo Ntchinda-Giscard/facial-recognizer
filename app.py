@@ -26,7 +26,7 @@ app.add_middleware(
 
 pc = Pinecone(api_key="bc89edcc-47ce-4528-8aa7-c8250226aeff")
 # index = pc.Index("image-reg")
-index = None
+# index = None
 
 UPLOAD_DIRECTORY = "UPLOAD"
 FIND = "FIND"
@@ -296,6 +296,24 @@ async def add_user(
     id: str = Form(...),
     location_id: str = Form(...)
 ):
+    base_url = "https://8501-129-0-189-24.ngrok-free.app/api/v1/index/company"
+    company_id = company_id
+    url = f"{base_url}/{company_id}"
+
+    try:
+        # Perform the GET request
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an HTTPError for bad responses
+        
+        # Extract the JSON data from the response
+        data = response.json()
+        
+        # Print or process the data
+
+    except requests.exceptions.HTTPError as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
+    except requests.exceptions.RequestException as err:
+       raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
     try:
         # Ensure the upload directory exists
         os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
@@ -306,6 +324,9 @@ async def add_user(
 
         embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
         embedding_vector = embedding[0]['embedding']
+        print(f"[*] --- Data --> {data["data"]["data"]["index"]}")
+
+        index = pc.Index(data["data"]["data"]["index"])
 
         result_data = lookup_user(index, embedding_vector)
         if result_data["matches"][0]["score"] >= 79.00:
