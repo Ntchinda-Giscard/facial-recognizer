@@ -267,7 +267,7 @@ async def add_user(image: UploadFile = File(...), companyId: str = Form(...), na
         print(result_data)
         if(result_data["matches"][0]["score"] >= 0.79):
 
-            return JSONResponse(content={"message": "A similar user already exist", "status_code": 202, "data": result_data})
+            return JSONResponse(content={"message": "A similar user already exist", "data": result_data}, status_code = 202,)
 
         index.upsert(
             vectors=[
