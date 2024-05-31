@@ -310,36 +310,36 @@ async def recognize(image: UploadFile = File(...)):
 # Define the webhook payload model
 
 
-# class WebhookPayload(BaseModel):
-#     company_id: str
-#     company_name: str
+class WebhookPayload(BaseModel):
+    company_id: str
+    company_name: str
 
-# @app.post("/webhook")
-# async def create_pinecone_index(payload: WebhookPayload):
-#     company_id = payload.company_id
-#     company_name = payload.company_name
+@app.post("/webhook")
+async def create_pinecone_index(payload: WebhookPayload):
+    company_id = payload.company_id
+    company_name = payload.company_name
 
-#     return JSONResponse(content={"message": "Endpoint deprecated"}, status_code=200)
+    return JSONResponse(content={"message": "Endpoint deprecated"}, status_code=200)
 
-#     # Create an index in Pinecone
-#     # index_name = f"company-index-{company_id}-{company_name}"
-#     # if index_name not in pc.list_indexes():
-#     #     try:
+    # Create an index in Pinecone
+    # index_name = f"company-index-{company_id}-{company_name}"
+    # if index_name not in pc.list_indexes():
+    #     try:
             
-#     #         pc.create_index(
-#     #             name= index_name,
-#     #             dimension=1536,
-#     #             metric="cosine",
-#     #             spec=ServerlessSpec(
-#     #                 cloud="aws",
-#     #                 region="us-east-1"
-#     #             )
-#     #         )
-#     #         return {"message": f"Index '{index_name}' created successfully"}
-#     #     except Exception as e:
-#     #         raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
-#     # else:
-#     #     return {"message": f"Index '{index_name}' already exists"}
+    #         pc.create_index(
+    #             name= index_name,
+    #             dimension=1536,
+    #             metric="cosine",
+    #             spec=ServerlessSpec(
+    #                 cloud="aws",
+    #                 region="us-east-1"
+    #             )
+    #         )
+    #         return {"message": f"Index '{index_name}' created successfully"}
+    #     except Exception as e:
+    #         raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
+    # else:
+    #     return {"message": f"Index '{index_name}' already exists"}
 
 
 
