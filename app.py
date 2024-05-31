@@ -367,7 +367,7 @@ async def recognize(image: UploadFile = File(...)):
         # Convert the encoding to a list
         encoding_list = embedding_vector
 
-        result_data = lookup_user(index, encoding_list)
+        result_data = lookup_user("2-vmedia", encoding_list)
 
         if(result_data["matches"][0]["score"] >= 0.7900):
             return JSONResponse(content={"message": "User found", "data": result_data, "status_code" : 200})
