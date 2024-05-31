@@ -251,96 +251,98 @@ async def read_items():
 
 
 
-@app.post("/add-user")
-async def add_user(image: UploadFile = File(...), companyId: str = Form(...), name: str = Form(...), id: str = Form(...), location_id: str = Form(...)):
+# @app.post("/add-user")
+# async def add_user(image: UploadFile = File(...), companyId: str = Form(...), name: str = Form(...), id: str = Form(...), location_id: str = Form(...)):
 
-    try:
-        image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
-        with open(image_path, "wb") as buffer:
-            buffer.write(await image.read())
+#     try:
+#         image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
+#         with open(image_path, "wb") as buffer:
+#             buffer.write(await image.read())
 
-        embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
-        embedding_vector = embedding[0]['embedding']
+#         embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
+#         embedding_vector = embedding[0]['embedding']
 
-        result_data = lookup_user(index, embedding_vector)
+#         result_data = lookup_user(index, embedding_vector)
 
-        print(result_data)
-        if(result_data["matches"][0]["score"] >= 79.00):
+#         print(result_data)
+#         if(result_data["matches"][0]["score"] >= 79.00):
 
-            return JSONResponse(content={"message": "A similar user already exist", "status_code": 202, "data": result_data})
-
-
-
-        index.upsert(
-            vectors=[
-                {
-                    "id": id,
-                    "values" : embedding_vector,
-                    "metadata" : {"name": name, "location_id": int(location_id), "id": id, "companyId" : companyId}
-                }
-            ],
-            namespace="ns1"
-        )
-        return JSONResponse(content={"message": f"Image {image.filename} saved successfully and name '{name}' received.", "status_code": 200})
-    except Exception as e:
-        return {"message": f"Internal server error {str(e)} ", "status_code" : 500}
+#             return JSONResponse(content={"message": "A similar user already exist", "status_code": 202, "data": result_data})
 
 
-@app.post("/recognize")
-async def recognize(image: UploadFile = File(...)):
-    try:
-        image_path = os.path.join(FIND, image.filename)
-        with open(image_path, "wb") as buffer:
-            buffer.write(await image.read())
+
+#         index.upsert(
+#             vectors=[
+#                 {
+#                     "id": id,
+#                     "values" : embedding_vector,
+#                     "metadata" : {"name": name, "location_id": int(location_id), "id": id, "companyId" : companyId}
+#                 }
+#             ],
+#             namespace="ns1"
+#         )
+#         return JSONResponse(content={"message": f"Image {image.filename} saved successfully and name '{name}' received.", "status_code": 200})
+#     except Exception as e:
+#         return {"message": f"Internal server error {str(e)} ", "status_code" : 500}
+
+
+# @app.post("/recognize")
+# async def recognize(image: UploadFile = File(...)):
+#     try:
+#         image_path = os.path.join(FIND, image.filename)
+#         with open(image_path, "wb") as buffer:
+#             buffer.write(await image.read())
         
-        embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
-        embedding_vector = embedding[0]['embedding']
+#         embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
+#         embedding_vector = embedding[0]['embedding']
 
-        # Convert the encoding to a list
-        encoding_list = embedding_vector
+#         # Convert the encoding to a list
+#         encoding_list = embedding_vector
 
-        result_data = lookup_user(index, encoding_list)
+#         result_data = lookup_user(index, encoding_list)
 
-        if(result_data["matches"][0]["score"] >= 0.7900):
-            return JSONResponse(content={"message": "User found", "data": result_data, "status_code" : 200})
-        else:
-            return JSONResponse(content={"message": "User not found", "status_code" : 404, "data": result_data})
+#         if(result_data["matches"][0]["score"] >= 0.7900):
+#             return JSONResponse(content={"message": "User found", "data": result_data, "status_code" : 200})
+#         else:
+#             return JSONResponse(content={"message": "User not found", "status_code" : 404, "data": result_data})
         
-    except Exception as e:
-        return JSONResponse(content={"message": f"Internal server error {str(e)}", "status_code": 500})
+#     except Exception as e:
+#         return JSONResponse(content={"message": f"Internal server error {str(e)}", "status_code": 500})
 
-# Define the webhook payload model
-class WebhookPayload(BaseModel):
-    company_id: str
-    company_name: str
+# # Define the webhook payload model
+# class WebhookPayload(BaseModel):
+#     company_id: str
+#     company_name: str
 
-@app.post("/webhook")
-async def create_pinecone_index(payload: WebhookPayload):
-    company_id = payload.company_id
-    company_name = payload.company_name
+# @app.post("/webhook")
+# async def create_pinecone_index(payload: WebhookPayload):
+#     company_id = payload.company_id
+#     company_name = payload.company_name
 
-    return JSONResponse(content={"message": "Endpoint deprecated"}, status_code=200)
+#     return JSONResponse(content={"message": "Endpoint deprecated"}, status_code=200)
 
-    # Create an index in Pinecone
-    # index_name = f"company-index-{company_id}-{company_name}"
-    # if index_name not in pc.list_indexes():
-    #     try:
+#     # Create an index in Pinecone
+#     # index_name = f"company-index-{company_id}-{company_name}"
+#     # if index_name not in pc.list_indexes():
+#     #     try:
             
-    #         pc.create_index(
-    #             name= index_name,
-    #             dimension=1536,
-    #             metric="cosine",
-    #             spec=ServerlessSpec(
-    #                 cloud="aws",
-    #                 region="us-east-1"
-    #             )
-    #         )
-    #         return {"message": f"Index '{index_name}' created successfully"}
-    #     except Exception as e:
-    #         raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
-    # else:
-    #     return {"message": f"Index '{index_name}' already exists"}
-        
+#     #         pc.create_index(
+#     #             name= index_name,
+#     #             dimension=1536,
+#     #             metric="cosine",
+#     #             spec=ServerlessSpec(
+#     #                 cloud="aws",
+#     #                 region="us-east-1"
+#     #             )
+#     #         )
+#     #         return {"message": f"Index '{index_name}' created successfully"}
+#     #     except Exception as e:
+#     #         raise HTTPException(status_code=500, detail=f"Failed to create index: {str(e)}")
+#     # else:
+#     #     return {"message": f"Index '{index_name}' already exists"}
+
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=7860)
