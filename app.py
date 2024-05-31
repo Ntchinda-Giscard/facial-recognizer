@@ -314,51 +314,47 @@ async def add_user(
         raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
     except requests.exceptions.RequestException as err:
        raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
-    # try:
+    try:
         # Ensure the upload directory exists
-    os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+        os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
 
-    image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
-    with open(image_path, "wb") as buffer:
-        buffer.write(await image.read())
+        image_path = os.path.join(UPLOAD_DIRECTORY, image.filename)
+        with open(image_path, "wb") as buffer:
+            buffer.write(await image.read())
 
-    embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
-    embedding_vector = embedding[0]['embedding']
-    print(data)
+        embedding = DeepFace.represent(img_path=image_path, model_name='DeepFace')
+        embedding_vector = embedding[0]['embedding']
+        print(data)
 
-    index = data["data"]["data"][0]["index"]
+        index = data["data"]["data"][0]["index"]
 
-    index = pc.Index(index)
+        index = pc.Index(index)
 
-    return JSONResponse(
-            content={"message": f"Image {image.filename} saved successfully and name '{name}' received.", "status_code": 200},
-                status_code=200       
+
+        result_data = lookup_user(index, embedding_vector)
+        if result_data["matches"][0]["score"] >= 79.00:
+            return JSONResponse(
+                content={"message": "A similar user already exist", "status_code": 202, "data": result_data},
+                status_code=202
             )
 
-    #     result_data = lookup_user(index, embedding_vector)
-    #     if result_data["matches"][0]["score"] >= 79.00:
-    #         return JSONResponse(
-    #             content={"message": "A similar user already exist", "status_code": 202, "data": result_data},
-    #             status_code=202
-    #         )
+        index.upsert(
+            vectors=[
+                {
+                    "id": id,
+                    "values": embedding_vector,
+                    "metadata": {"name": name, "location_id": int(location_id), "id": id}
+                }
+            ],
+            namespace="ns1"
+        )
 
-    #     index.upsert(
-    #         vectors=[
-    #             {
-    #                 "id": id,
-    #                 "values": embedding_vector,
-    #                 "metadata": {"name": name, "location_id": int(location_id), "id": id}
-    #             }
-    #         ],
-    #         namespace="ns1"
-    #     )
-
-    #     return JSONResponse(
-    #         content={"message": f"Image {image.filename} saved successfully and name '{name}' received.", "status_code": 200},
-    #         status_code=200
-    #     )
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
+        return JSONResponse(
+            content={"message": f"Image {image.filename} saved successfully and name '{name}' received."},
+            status_code=200
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
 
 
 @app.post("/recognize")
